@@ -1,0 +1,34 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div id="container">
+    <app-sidebar></app-sidebar>
+  
+    <div id="content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+<!-- <div class="container-fluid">
+    <div style="color: blue;">
+      <h1>{{title}}</h1>
+      <h3>{{description}}</h3>
+    </div>
+   
+    <div style="width: 300px;">
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="item">Item</label> 
+          <input type="text" class="form-control" placeholder="Enter content..." id="item"
+            required [(ngModel)]="itemValue" name="item">
+        </div>
+   
+        <div class="btn-group">
+          <button type="submit" class="btn btn-success">Submit</button>
+        </div>
+      </form>
+    </div>
+   
+    <h2>Content from Firebase</h2>
+    <div class="col-md-3">
+      <pre *ngFor="let item of items | async">{{item.content}}</.pre>
+    </div>
+  </div> -->

@@ -1,0 +1,57 @@
+/* You can add global styles to this file, and also import other style files */
+@import '~bootstrap/scss/bootstrap-reboot';
+@import '~bootstrap/scss/bootstrap-grid';
+
+body {
+    margin: 0;
+    background: #F2F2F2;
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+}
+
+#container {
+   display: grid;
+   grid-template-columns: 70px auto;
+   height: 100%;
+
+   #content {
+       padding: 30px 50px;
+
+       ul {
+           list-style-type: none;
+           margin:0;padding:0;
+       
+           li {
+               background: #fff;
+               border-radius: 8px;
+               padding: 20px;
+               margin-bottom: 8px;
+       
+               a {
+                  // font-size: 2em;
+                   text-decoration: none;
+                   font-weight: bold;
+                   color:#00A8FF;
+               }
+       
+               ul {
+                   margin-top: 5px;
+                   
+                   li {
+                       padding:0;
+                   }
+               }
+           }
+       }
+   }
+}
+
+.container{
+    background: #ffffff;
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.padding-left{
+    padding-left: 8px;
+}

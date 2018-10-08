@@ -1,0 +1,52 @@
+<div class="container-fluid">
+
+  <h1>Employees</h1>
+
+  <div class="container-fluid">
+    <a routerLink="/add-employee">Add new employee</a>
+    <input type="text" placeholder="Search" class="form-control" style="width:20%;float: right;" 
+    (input)="FilterList($event.target.value)">
+  </div>
+  <div class="container-fluid">
+    <input type="file" style="width:25%;" class="pull-left" (change)="onFileChange($event)" 
+      multiple="false" accept=".xlsx" />
+      <button type="submit" class="btn btn-success" *ngIf="data != null" (click)="ImportData()">Import</button>
+    </div>
+<br>
+  <div class="container" style="padding-top:20px;">   
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Emp ID</th>
+          <th>Full name</th>
+          <th>Email</th>
+          <th>Designation</th>
+          <!-- <th>Gender</th> -->
+          <th>Line Manager</th>
+          <th colspan="3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let employee of employees | async">
+          <td>{{ employee.payload.val().EmpID }}</td>
+          <td>{{ employee.payload.val().FullName }}</td>
+          <td>{{ employee.payload.val().Email }}</td>
+          <td>{{employee.payload.val().DesignationValue}}</td>
+          <!-- <td>{{employee.payload.val().Gender}}</td> -->
+          <td><a routerLink="/employees/{{employee.payload.val().LineManagerID}}">{{employee.payload.val().LineManagerValue}}</a></td>
+          <td>
+            <a routerLink="/add-employee/{{employee.key}}">Edit</a>
+          </td>
+          <td>
+            <a href="javascript:void(0)" (click)="RemoveEmployee(employee.key, employee.payload.val().LineManagerID || '0')">Delete</a>
+          </td>
+          <td> 
+            <a href="javascript:void(0)" (click)="MarkUnmarkLM(employee.key, employee.payload.val().IsLineManager)">
+              {{employee.payload.val().IsLineManager ? 'Remove as LM' : 'Mark as LM'}}
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

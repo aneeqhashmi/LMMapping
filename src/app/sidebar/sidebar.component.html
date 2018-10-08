@@ -1,0 +1,24 @@
+<nav>
+  <ul>
+    <li>
+      <a routerLink="" [class.activated]="currentUrl == '/'">
+        <i class="material-icons">supervised_user_circle</i>
+      </a>
+    </li>
+    <li>
+        <a routerLink="linemanagers" [class.activated]="currentUrl == '/linemanagers'">
+          <i class="material-icons">supervised_user_circle</i>
+        </a>
+    </li>
+    <li>
+        <a routerLink="directors" [class.activated]="currentUrl == '/directors'">
+          <i class="material-icons">supervised_user_circle</i>
+        </a>
+    </li>
+    <li>
+        <a routerLink="designations" [class.activated]="currentUrl == '/designations'">
+          <i class="material-icons">message</i>
+        </a>
+    </li>
+  </ul>
+</nav>
