@@ -6,7 +6,6 @@ import { filter, map } from 'rxjs/operators';
 
 //import { XLSX$Utils } from 'xlsx';
 import * as XLSX from 'xlsx';
-import { resolve } from 'q';
 
 @Component({
   selector: 'app-employees',
@@ -50,15 +49,14 @@ export class EmployeesComponent implements OnInit {
   }
 
   ngOnInit(){
-    this.employees = this.db.list('employees').snapshotChanges();
+    this.employees = this.db.list('employees', ref=> ref.orderByChild('FullName')).snapshotChanges();
     this.employeesActualList = this.employees;
 
     this.db.list('designations').snapshotChanges().pipe(map(changes =>
       changes.map(c => ({ key: c.payload.key, value: c.payload.val() }))
-    )).subscribe((managers) => {
-      this.designations = managers;
+    )).subscribe((designations) => {
+      this.designations = designations;
     });
-    //this.employees.subscribe(ref=>{console.log(ref[0].payload.val())});
   }
 
   FilterList(val){
@@ -70,6 +68,15 @@ export class EmployeesComponent implements OnInit {
         employees.filter(emp => emp.payload.val().FullName.toLowerCase().includes(val))
       ));
       //this.employees.subscribe(ref=>{console.log(ref)})
+    }
+  }
+
+  GetUnAssignedList(flag){
+    this.employees= this.employeesActualList;
+    if(flag){
+      this.employees = this.employees.pipe(map(employees => 
+        employees.filter(emp => !emp.payload.val().IsLineManagerAssigned)
+      ));
     }
   }
 
@@ -137,20 +144,30 @@ export class EmployeesComponent implements OnInit {
     console.log(this.data);
 
     for (let row = 1; row < this.data.length; row++) {
+      
       var desigDirKey = this.designations.filter((item) => { 
-        return item['value'].toLowerCase() === this.data[1][14].toLowerCase(); 
+        return item['value'].toLowerCase() === this.data[row][14].toLowerCase(); 
       });
 
       var desigLMKey = this.designations.filter((item) => { 
-        return item['value'].toLowerCase() === this.data[1][9].toLowerCase(); 
+        return item['value'].toLowerCase() === this.data[row][9].toLowerCase(); 
       });
      
       var desigEmpKey = this.designations.filter((item) => { 
-        return item['value'].toLowerCase() === this.data[1][2].toLowerCase(); 
+        return item['value'].toLowerCase() === this.data[row][2].toLowerCase(); 
       });
-     
-      //console.log(this.data[row]);
       
+      //console.log(this.data[row]);
+      if(desigEmpKey[0] == undefined){
+        desigEmpKey.push({key:'-', value: '-'});
+      }
+      if(desigLMKey[0] == undefined){
+        desigLMKey.push({key:'-', value: '-'});
+      }
+      if(desigDirKey[0] == undefined){
+        desigDirKey.push({key:'-', value: '-'});
+      }
+
       var empPromise = this.addEmployee(this.data[row][0], this.data[row][1], this.data[row][3], desigEmpKey[0]['key'], 
         this.data[row][2], false, false, false, false);
 
@@ -220,6 +237,12 @@ export class EmployeesComponent implements OnInit {
                     lmPromise.then((lmValues )=>{
                       lmID = lmValues['key'];
                       lmValue = lmValues['value'];
+
+                      if(this.data[row][9] == 140){
+                        CEOID = lmID;
+                        CEOValue = lmValue;
+                      }
+
                       if(directorID != '0'){
                         
                         if(this.data[row][0] == this.data[row][12]){
@@ -266,6 +289,12 @@ export class EmployeesComponent implements OnInit {
                 lmPromise.then((lmValues )=>{
                   lmID = lmValues['key'];
                   lmValue = lmValues['value'];
+
+                  if(this.data[row][9] == 140){
+                    CEOID = lmID;
+                    CEOValue = lmValue;
+                  }
+                  
                   if(directorID != '0'){
                     
                     if(this.data[row][0] == this.data[row][12]){

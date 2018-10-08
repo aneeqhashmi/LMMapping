@@ -42,7 +42,8 @@ export class LineManagersComponent implements OnInit {
   constructor(public db: AngularFireDatabase) { }
 
   ngOnInit() { 
-    this.managers = this.db.list('employees', ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges();
+    this.managers = this.db.list('employees', 
+      ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges();
     this.managersActualList = this.managers;
 
     /*this.managers.pipe(map(changes =>

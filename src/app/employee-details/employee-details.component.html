@@ -8,32 +8,18 @@
         <th>Full name</th>
         <th>Email</th>
         <th>Designation</th>
-        <!-- <th>Gender</th> -->
         <th>Line Manager</th>
         <th>Director</th>
-        <!-- <th colspan="3"></th> -->
     </tr>
     </thead>
     <tbody>
-    <tr *ngIf="employee!= undefined">
+    <tr *ngIf="employee != undefined">
         <td>{{ employee.EmpID }}</td>
         <td>{{ employee.FullName }}</td>
         <td>{{ employee.Email }}</td>
         <td>{{ employee.DesignationValue }}</td>
-        <!-- <td>{{ employee.Gender }}</td> -->
         <td><a routerLink="/employees/{{employee.LineManagerID}}">{{employee.LineManagerValue}}</a></td>
         <td><a routerLink="/employees/{{employee.ManagingDirectorID}}">{{employee.ManagingDirectorValue}}</a></td>
-        <!-- <td>
-            <a routerLink="/add-employee/{{employee.key}}">Edit</a>
-        </td>
-        <td>
-            <a href="javascript:void(0)" (click)="RemoveEmployee(employee.key, employee.payload.val().LineManagerID || '0')">Delete</a>
-        </td>
-        <td> 
-            <a href="javascript:void(0)" (click)="MarkUnmarkLM(employee.key, employee.payload.val().IsLineManager)">
-                {{employee.payload.val().IsLineManager ? 'Remove as LM' : 'Mark as LM'}}
-            </a>
-        </td> -->
     </tr>
     </tbody>
 </table>
@@ -42,8 +28,8 @@
 
 <br>
 
-<div class="container-fluid">
-<h1>Line Managers</h1>
+<div class="container-fluid" *ngIf="managers != undefined && managers != null">
+<h1>Mapped Line Managers</h1>
 <div class="container" style="padding-top:20px;">   
 <table class="table table-striped table-hover">
     <thead>
@@ -52,21 +38,14 @@
         <th>Full name</th>
         <th>Email</th>
         <th>Designation</th>
-        <!-- <th>Gender</th> -->
-        <th>Line Manager</th>
-        <th>Director</th>
-        <!-- <th colspan="3"></th> -->
     </tr>
     </thead>
     <tbody>
         <tr *ngFor="let manager of managers | async">
             <td>{{ manager.payload.val().EmpID }}</td>
-            <td>{{ manager.payload.val().FullName }}</td>
+            <td><a routerLink="/employees/{{manager.key}}">{{ manager.payload.val().FullName }}</a></td>
             <td>{{ manager.payload.val().Email }}</td>
             <td>{{ manager.payload.val().DesignationValue }}</td>
-            <!-- <td>{{ manager.payload.val().Gender }}</td> -->
-            <td><a routerLink="/employees/{{manager.payload.val().LineManagerID}}">{{manager.payload.val().LineManagerValue}}</a></td>
-            <td><a routerLink="/employees/{{manager.payload.val().ManagingDirectorID}}">{{manager.payload.val().ManagingDirectorValue}}</a></td>
         </tr>
     </tbody>
 </table>
@@ -75,8 +54,8 @@
 
 <br>
 
-<div class="container-fluid">
-    <h1>Managees</h1>
+<div class="container-fluid" *ngIf="managees != undefined && managees != null">
+    <h1>Line Managees</h1>
     <div class="container" style="padding-top:20px;">   
     
     <table class="table table-striped table-hover">
@@ -86,25 +65,14 @@
                 <th>Full name</th>
                 <th>Email</th>
                 <th>Designation</th>
-                <!-- <th>Gender</th> -->
-                <!-- <th colspan="2"></th> -->
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let emp of managees | async">
                 <td>{{ emp.payload.val().EmpID }}</td>
-                <td>{{ emp.payload.val().FullName }}</td>
+                <td><a routerLink="/employees/{{emp.key}}">{{ emp.payload.val().FullName }}</a></td>
                 <td>{{ emp.payload.val().Email }}</td>
                 <td>{{ emp.payload.val().DesignationValue }}</td>
-                <!-- <td>{{ emp.payload.val().Gender }}</td> -->
-                <!-- <td>
-                    <a routerLink="/add-employee/{{emp.key}}" data-dismiss="modal">Edit</a>
-                </td>
-                <td> 
-                    <a href="javascript:void(0)" (click)="RemoveManagee(emp.key)">
-                    Remove
-                    </a>
-                </td> -->
             </tr>
         </tbody>
     </table>

@@ -19,13 +19,13 @@
     <!-- <th>Gender</th> -->
     <th>Director</th>
     <th>View Managees</th>
-    <th colspan="2"></th>
+    <th colspan="3"></th>
   </tr>
 </thead>
 <tbody>
   <tr *ngFor="let manager of managers | async">
     <td>{{ manager.payload.val().EmpID }}</td>
-    <td>{{ manager.payload.val().FullName }}</td>
+    <td><a routerLink="/employees/{{manager.key}}">{{ manager.payload.val().FullName }}</a></td>
     <td>{{ manager.payload.val().Email }}</td>
     <td>{{ manager.payload.val().DesignationValue }}</td>
     <!-- <td>{{ manager.payload.val().Gender }}</td> -->
@@ -37,7 +37,8 @@
     </td>
     <td>
       <a routerLink="/add-employee/{{manager.key}}">Edit</a>
-   
+    </td>
+    <td>
       <a href="javascript:void(0)" class="padding-left" (click)="MarkUnmarkLM(manager.key, manager.payload.val().IsLineManager)">
         {{manager.payload.val().IsLineManager ? 'Remove as LM' : 'Mark as LM'}}
       </a>
@@ -74,7 +75,7 @@
         <tbody>
           <tr *ngFor="let emp of managees | async">
             <td>{{ emp.payload.val().EmpID }}</td>
-            <td>{{ emp.payload.val().FullName }}</td>
+            <td><a routerLink="/employees/{{emp.key}}" data-dismiss="modal">{{ emp.payload.val().FullName }}</a></td>
             <td>{{ emp.payload.val().Email }}</td>
             <td>{{ emp.payload.val().DesignationValue }}</td>
             <!-- <td>{{ emp.payload.val().Gender }}</td> -->

@@ -43,16 +43,38 @@ export class DesignationsComponent implements OnInit {
   ngOnInit() {
     this.designations = this.db.list('designations').snapshotChanges();
     this.getCount();
+    this.designations.subscribe(ref=>{console.log(ref[0])});
   }
 
   onSubmit() {
     if(this.desigValue.trim().length > 0){
-    this.db.database.ref('designations').child(this.count.toString()).set(this.desigValue);
-    this.getCount();
+    this.db.database.ref('designations').child(this.count.toString()).set(this.desigValue).then(t=>{
+      this.desigValue = '';
+      this.getCount();
+      alert('Designation added successfully.');
+    });
     }
   }
 
   getCount(){
     this.db.object('designations').valueChanges().subscribe(ref=> {this.count = ++Object.keys(ref).length});
+  }
+
+  RemoveDesignation(id){
+    console.log(id)
+    this.db.database.ref('employees').orderByChild('DesignationKey').equalTo(id)
+      .once('value').then((snapshot) => {
+        if(snapshot.exists()){
+          alert('Cannot delete the designation as selected designation is mapped to employees.');
+        }
+        else{
+          if(confirm('Are you sure you want to delete this designation?')){
+            this.db.database.ref('designations').child(id).remove().then(a=>{
+              this.getCount();
+            });
+          }
+        }
+      });
+    
   }
 }

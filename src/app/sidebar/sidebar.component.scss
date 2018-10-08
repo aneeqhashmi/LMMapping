@@ -1,6 +1,7 @@
 nav {
     background: #2D2E2E;
     height: 100%;
+    width: 140%;
 
     ul {
         list-style-type: none;
@@ -13,12 +14,15 @@ nav {
                 color: #fff;
                 padding: 20px;
                 display: block;
-            }
+            }   
 
             .activated {
                 background-color: #00a8ff;
             }
         }
-    }
-    
+    }   
+}
+
+.icon-font-24{
+    font-size:22px
 }

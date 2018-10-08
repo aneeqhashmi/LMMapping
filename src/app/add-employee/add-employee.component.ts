@@ -49,7 +49,7 @@ export class AddEmployeeComponent implements OnInit {
 
       this.emp.subscribe(ref=>{
         this.empIdValue = ref.EmpID;
-        this.fnameValue = ref.FirstName;
+        this.fnameValue = ref.FullName;
         //this.lnameValue = ref.LastName;
         this.emailValue = ref.Email;
         this.designationKey = ref.DesignationKey;
@@ -78,13 +78,10 @@ export class AddEmployeeComponent implements OnInit {
     val = val.trim();
     //console.log(val);
     if(val.length > 0){
-      var flag = false;
       this.db.database.ref('employees').orderByChild('EmpID').equalTo(val)
-      .once('value').then(function(snapshot){
-        if(snapshot.exists)
-          flag= true;
+      .once('value').then((snapshot) => {
+        this.empIdExists = snapshot.exists();
       });
-      setTimeout(() => { this.empIdExists = flag; }, 1500);
     }
     else
       this.empIdExists = false;
@@ -111,76 +108,77 @@ export class AddEmployeeComponent implements OnInit {
     if(this.empIdExists && this.emp$ == '0'){
       return;
     }
-    
-    var isLMAssignedValue = (this.LMKey != "0" && this.LMKey != undefined);
-    var isMDAssignedValue = (this.MDKey != "0");
+    else{
+      var isLMAssignedValue = (this.LMKey != "0" && this.LMKey != undefined);
+      var isMDAssignedValue = (this.MDKey != "0");
 
-    if(this.emp$ == '0'){
-      this.emp$ = this.db.list('/employees').push({ EmpID: this.empIdValue, FullName: this.fnameValue,
-        Email: this.emailValue, DesignationKey: this.designationKey, DesignationValue: this.designationValue, /*Gender: this.genderValue,*/
-        IsLineManager: this.isLMValue, IsLineManagerAssigned: isLMAssignedValue, 
-        IsManagingDirector: this.isMDValue, IsManagingDirectorAssigned: isMDAssignedValue }).key;
+      if(this.emp$ == '0'){
+        this.emp$ = this.db.list('/employees').push({ EmpID: this.empIdValue, FullName: this.fnameValue,
+          Email: this.emailValue, DesignationKey: this.designationKey, DesignationValue: this.designationValue, /*Gender: this.genderValue,*/
+          IsLineManager: this.isLMValue, IsLineManagerAssigned: isLMAssignedValue, 
+          IsManagingDirector: this.isMDValue, IsManagingDirectorAssigned: isMDAssignedValue }).key;
+          
+        this.Message = "Record saved successfully.";
+      }
+      else{
+        this.db.database.ref('/employees/' + this.emp$).update({ EmpID: this.empIdValue, FullName: this.fnameValue,
+          Email: this.emailValue, DesignationKey: this.designationKey, DesignationValue: this.designationValue, /*Gender: this.genderValue,*/
+          IsLineManager: this.isLMValue, IsLineManagerAssigned: isLMAssignedValue,
+          IsManagingDirector: this.isMDValue, IsManagingDirectorAssigned: isMDAssignedValue });
         
-      this.Message = "Record saved successfully.";
-    }
-    else{
-      this.db.database.ref('/employees/' + this.emp$).update({ EmpID: this.empIdValue, FullName: this.fnameValue,
-        Email: this.emailValue, DesignationKey: this.designationKey, DesignationValue: this.designationValue, /*Gender: this.genderValue,*/
-        IsLineManager: this.isLMValue, IsLineManagerAssigned: isLMAssignedValue,
-        IsManagingDirector: this.isMDValue, IsManagingDirectorAssigned: isMDAssignedValue });
-      
-      this.Message = "Record updated successfully.";
-    }
+        this.Message = "Record updated successfully.";
+      }
 
-    if(this.isOldLMValue && !this.isLMValue){
-      var ref = this.db.database.ref('/employees');
-      this.db.database.ref('/line-managers').child(this.emp$ as string).remove();
-      ref.orderByChild('LineManagerID').equalTo(this.emp$ as string)
-        .once('value').then(function(snapshot){
-          snapshot.forEach(function(childSnapshot) {
-            ref.child(childSnapshot.key).child('IsLineManagerAssigned').set(false);
-            ref.child(childSnapshot.key).child('LineManagerID').remove();
+      if(this.isOldLMValue && !this.isLMValue){
+        var ref = this.db.database.ref('/employees');
+        this.db.database.ref('/line-managers').child(this.emp$ as string).remove();
+        ref.orderByChild('LineManagerID').equalTo(this.emp$ as string)
+          .once('value').then(function(snapshot){
+            snapshot.forEach(function(childSnapshot) {
+              ref.child(childSnapshot.key).child('IsLineManagerAssigned').set(false);
+              ref.child(childSnapshot.key).child('LineManagerID').remove();
+          });
         });
-      });
-    }
+      }
 
-    if(this.isOldMDValue && !this.isMDValue) {
-      var ref = this.db.database.ref('/employees');
-      this.db.database.ref('/directors').child(this.emp$ as string).remove();
-      ref.orderByChild('ManagingDirectorID').equalTo(this.emp$ as string)
-        .once('value').then(function(snapshot){
-          snapshot.forEach(function(childSnapshot) {
-            ref.child(childSnapshot.key).child('IsManagingDirectorAssigned').set(false);
-            ref.child(childSnapshot.key).child('ManagingDirectorID').remove();
+      if(this.isOldMDValue && !this.isMDValue) {
+        var ref = this.db.database.ref('/employees');
+        this.db.database.ref('/directors').child(this.emp$ as string).remove();
+        ref.orderByChild('ManagingDirectorID').equalTo(this.emp$ as string)
+          .once('value').then(function(snapshot){
+            snapshot.forEach(function(childSnapshot) {
+              ref.child(childSnapshot.key).child('IsManagingDirectorAssigned').set(false);
+              ref.child(childSnapshot.key).child('ManagingDirectorID').remove();
+          });
         });
-      });
-    }
+      }
 
-    if(isLMAssignedValue){
-      this.db.database.ref('/line-managers').child(this.LMKey).child(this.emp$ as string).set(true);
-      this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerID').set(this.LMKey);
-      this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerValue').set(this.LMValue);
-    }
-    else{
-      this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerID').remove();
-      this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerValue').remove();
-      if(this.OldLMKey!= '0')
-        this.db.database.ref('/line-managers').child(this.OldLMKey).child(this.emp$ as string).remove();
-    }
+      if(isLMAssignedValue){
+        this.db.database.ref('/line-managers').child(this.LMKey).child(this.emp$ as string).set(true);
+        this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerID').set(this.LMKey);
+        this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerValue').set(this.LMValue);
+      }
+      else{
+        this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerID').remove();
+        this.db.database.ref('/employees').child(this.emp$ as string).child('LineManagerValue').remove();
+        if(this.OldLMKey!= '0')
+          this.db.database.ref('/line-managers').child(this.OldLMKey).child(this.emp$ as string).remove();
+      }
 
-    if(isMDAssignedValue){
-      this.db.database.ref('/directors').child(this.MDKey).child(this.emp$ as string).set(true);
-      this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorID').set(this.MDKey);
-      this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorValue').set(this.LMValue);
+      if(isMDAssignedValue){
+        this.db.database.ref('/directors').child(this.MDKey).child(this.emp$ as string).set(true);
+        this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorID').set(this.MDKey);
+        this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorValue').set(this.MDValue);
+      }
+      else{
+        this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorID').remove();
+        this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorValue').remove();
+        if(this.OldMDKey!= '0')
+          this.db.database.ref('/directors').child(this.OldMDKey).child(this.emp$ as string).remove();
+      }
+      this.clearModel();
+      setTimeout(() => { this.router.navigate(['/add-employee']); this.Message = ''; }, 1500);
     }
-    else{
-      this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorID').remove();
-      this.db.database.ref('/employees').child(this.emp$ as string).child('ManagingDirectorValue').remove();
-      if(this.OldMDKey!= '0')
-        this.db.database.ref('/directors').child(this.OldMDKey).child(this.emp$ as string).remove();
-    }
-    this.clearModel();
-    setTimeout(() => { this.router.navigate(['/add-employee']); this.Message = ''; }, 3000);
   }
 
   clearModel(){
@@ -203,5 +201,9 @@ export class AddEmployeeComponent implements OnInit {
     this.MDValue = '';
     this.OldMDKey = '0';
     this.designations = this.designations;
+  }
+
+  CancelSave(){
+    this.router.navigate(['/']);
   }
 }

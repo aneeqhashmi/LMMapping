@@ -4,7 +4,7 @@
     <h2 class="success">{{Message}}</h2>
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <table style="width: 40%;">
+        <table style="width: 45%;">
           <tr>
             <th>Emp ID: </th>
             <td>
@@ -96,6 +96,7 @@
  
       <div class="btn-group">
         <button type="submit" class="btn btn-success">Submit</button>
+        <button type="submit" class="btn btn-danger" style="margin-left: 10px;" (click)="CancelSave()">Cancel</button>
       </div>
     </form>
   </div>

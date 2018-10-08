@@ -1,23 +1,28 @@
 <nav>
   <ul>
     <li>
-      <a routerLink="" [class.activated]="currentUrl == '/'">
-        <i class="material-icons">supervised_user_circle</i>
+      <a routerLink="" align="center" [class.activated]="currentUrl == '/'">
+        <!-- <i class="material-icons">supervised_user_circle</i> -->
+        <i class="fa fa-group icon-font-24"></i>	
+        <label>Employees</label>
       </a>
     </li>
     <li>
-        <a routerLink="linemanagers" [class.activated]="currentUrl == '/linemanagers'">
-          <i class="material-icons">supervised_user_circle</i>
+        <a routerLink="linemanagers" align="center" [class.activated]="currentUrl == '/linemanagers'">
+          <i class="fa fa-handshake-o icon-font-24"></i>
+          <label>Line Managers</label>
         </a>
     </li>
     <li>
-        <a routerLink="directors" [class.activated]="currentUrl == '/directors'">
-          <i class="material-icons">supervised_user_circle</i>
+        <a routerLink="directors" align="center" [class.activated]="currentUrl == '/directors'">
+          <i class="fa fa-user-secret icon-font-24"></i>
+          <label>Directors</label>
         </a>
     </li>
     <li>
-        <a routerLink="designations" [class.activated]="currentUrl == '/designations'">
-          <i class="material-icons">message</i>
+        <a routerLink="designations" align="center" [class.activated]="currentUrl == '/designations'">
+          <i class="fa fa-id-badge icon-font-24"></i>
+          <label>Designations</label>
         </a>
     </li>
   </ul>
