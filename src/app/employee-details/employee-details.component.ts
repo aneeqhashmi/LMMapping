@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from "@angular/router";
+import { Router, ActivatedRoute, NavigationEnd } from "@angular/router";
 import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable } from 'rxjs';
 
@@ -18,6 +18,19 @@ export class EmployeeDetailsComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, public db: AngularFireDatabase, private router: Router){
     this.route.params.subscribe(params =>  this.emp$ = params.id ? params.id : '0');
+
+    this.router.routeReuseStrategy.shouldReuseRoute = function(){
+      return false;
+   }
+
+   this.router.events.subscribe((evt) => {
+      if (evt instanceof NavigationEnd) {
+         // trick the Router into believing it's last link wasn't previously loaded
+         this.router.navigated = false;
+         // if you need to scroll back to top, here is the right place
+         window.scrollTo(0, 0);
+      }
+  });
   }
 
   ngOnInit(){
