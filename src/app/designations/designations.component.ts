@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable } from 'rxjs';
 import { trigger,style,transition,animate,keyframes,query,stagger } from '@angular/animations';
+import { map, take, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-designations',
@@ -41,9 +42,15 @@ export class DesignationsComponent implements OnInit {
   constructor(public db: AngularFireDatabase) { }
 
   ngOnInit() {
-    this.designations = this.db.list('designations').snapshotChanges();
+    this.designations = this.db.list('designations').snapshotChanges().pipe(map(changes =>
+      changes.map(c => ({ key: c.payload.key, value: c.payload.val() })).sort(this.SortByName)
+    ));
     this.getCount();
-    this.designations.subscribe(ref=>{console.log(ref[0])});
+    //this.designations.subscribe(ref=>{console.log(ref)});
+  }
+
+  SortByName(x,y) {
+    return ((x.value == y.value) ? 0 : ((x.value > y.value) ? 1 : -1 ));
   }
 
   onSubmit() {

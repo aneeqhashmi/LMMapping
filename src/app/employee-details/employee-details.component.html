@@ -42,10 +42,10 @@
     </thead>
     <tbody>
         <tr *ngFor="let manager of managers | async">
-            <td>{{ manager.payload.val().EmpID }}</td>
-            <td><a routerLink="/employees/{{manager.key}}">{{ manager.payload.val().FullName }}</a></td>
-            <td>{{ manager.payload.val().Email }}</td>
-            <td>{{ manager.payload.val().DesignationValue }}</td>
+            <td>{{ manager.EmpID }}</td>
+            <td><a routerLink="/employees/{{manager.key}}">{{ manager.FullName }}</a></td>
+            <td>{{ manager.Email }}</td>
+            <td>{{ manager.DesignationValue }}</td>
         </tr>
     </tbody>
 </table>
@@ -69,10 +69,10 @@
         </thead>
         <tbody>
             <tr *ngFor="let emp of managees | async">
-                <td>{{ emp.payload.val().EmpID }}</td>
-                <td><a routerLink="/employees/{{emp.key}}">{{ emp.payload.val().FullName }}</a></td>
-                <td>{{ emp.payload.val().Email }}</td>
-                <td>{{ emp.payload.val().DesignationValue }}</td>
+                <td>{{ emp.EmpID }}</td>
+                <td><a routerLink="/employees/{{emp.key}}">{{ emp.FullName }}</a></td>
+                <td>{{ emp.Email }}</td>
+                <td>{{ emp.DesignationValue }}</td>
             </tr>
         </tbody>
     </table>

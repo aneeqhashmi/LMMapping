@@ -18,9 +18,16 @@ export class DirectorsComponent implements OnInit {
   constructor(public db: AngularFireDatabase) { }
 
   ngOnInit() {
-    this.directors = this.db.list('employees', ref => ref.orderByChild('IsManagingDirector').equalTo(true)).snapshotChanges();
+    this.directors = this.db.list('employees', ref => ref.orderByChild('IsManagingDirector').equalTo(true))
+      .snapshotChanges().pipe(map(changes =>
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+      ));
     this.directorsActualList = this.managers;
     //this.directors.subscribe(ref=>{console.log(ref[0].payload.val())})
+  }
+
+  SortByName(x,y) {
+    return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
   }
 
   FilterList(val){
@@ -29,7 +36,7 @@ export class DirectorsComponent implements OnInit {
 
     if(val != ''){
       this.directors = this.directors.pipe(map(employees => 
-        employees.filter(emp => emp.payload.val().FullName.toLowerCase().includes(val))
+        employees.filter(emp => emp.FullName.toLowerCase().includes(val))
       ));
     }
   }
@@ -69,7 +76,10 @@ export class DirectorsComponent implements OnInit {
   }
 
   GetManagers(id){
-    this.managers = this.db.list('employees', i => i.orderByChild('ManagingDirectorID').equalTo(id)).snapshotChanges();
+    this.managers = this.db.list('employees', i => i.orderByChild('ManagingDirectorID').equalTo(id))
+      .snapshotChanges().pipe(map(changes =>
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+      ));
   }
 
 }

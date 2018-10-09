@@ -49,7 +49,9 @@ export class EmployeesComponent implements OnInit {
   }
 
   ngOnInit(){
-    this.employees = this.db.list('employees', ref=> ref.orderByChild('FullName')).snapshotChanges();
+    this.employees = this.db.list('employees').snapshotChanges().pipe(map(changes =>
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+      ));
     this.employeesActualList = this.employees;
 
     this.db.list('designations').snapshotChanges().pipe(map(changes =>
@@ -59,13 +61,17 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
+  SortByName(x,y) {
+    return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
+  }
+
   FilterList(val){
     this.employees= this.employeesActualList;
     val = val.trim().toLowerCase();
 
     if(val!= ''){
       this.employees = this.employees.pipe(map(employees => 
-        employees.filter(emp => emp.payload.val().FullName.toLowerCase().includes(val))
+        employees.filter(emp => emp.FullName.toLowerCase().includes(val))
       ));
       //this.employees.subscribe(ref=>{console.log(ref)})
     }
@@ -75,7 +81,7 @@ export class EmployeesComponent implements OnInit {
     this.employees= this.employeesActualList;
     if(flag){
       this.employees = this.employees.pipe(map(employees => 
-        employees.filter(emp => !emp.payload.val().IsLineManagerAssigned)
+        employees.filter(emp => !emp.IsLineManagerAssigned)
       ));
     }
   }

@@ -23,11 +23,11 @@
 </thead>
 <tbody>
   <tr *ngFor="let dir of directors | async">
-    <td>{{ dir.payload.val().EmpID }}</td>
-    <td><a routerLink="/employees/{{dir.key}}">{{ dir.payload.val().FullName }}</a></td>
-    <td>{{ dir.payload.val().Email }}</td>
-    <td>{{ dir.payload.val().DesignationValue }}</td>
-    <!-- <td>{{ dir.payload.val().Gender }}</td> -->
+    <td>{{ dir.EmpID }}</td>
+    <td><a routerLink="/employees/{{dir.key}}">{{ dir.FullName }}</a></td>
+    <td>{{ dir.Email }}</td>
+    <td>{{ dir.DesignationValue }}</td>
+    <!-- <td>{{ dir.Gender }}</td> -->
     <td>
       <input type="image" class="show" (click)="GetManagers(dir.key);" 
       src="https://mbtskoudsalg.com/images/vision-icon-png-5.png" style="width:20px;"
@@ -37,8 +37,8 @@
       <a routerLink="/add-employee/{{dir.key}}">Edit</a>
     </td>
     <td>
-      <a href="javascript:void(0)" class="padding-left" (click)="MarkUnmarkED(dir.key, dir.payload.val().IsManagingDirector)">
-        {{dir.payload.val().IsManagingDirector ? 'Remove as ED' : 'Mark as ED'}}
+      <a href="javascript:void(0)" class="padding-left" (click)="MarkUnmarkED(dir.key, dir.IsManagingDirector)">
+        {{dir.IsManagingDirector ? 'Remove as ED' : 'Mark as ED'}}
       </a>
     </td>
   </tr>
@@ -72,11 +72,11 @@
         </thead>
         <tbody>
           <tr *ngFor="let emp of managers | async">
-            <td>{{ emp.payload.val().EmpID }}</td>
-            <td><a routerLink="/employees/{{emp.key}}" data-dismiss="modal">{{ emp.payload.val().FullName }}</a></td>
-            <td>{{ emp.payload.val().Email }}</td>
-            <td>{{ emp.payload.val().DesignationValue }}</td>
-            <!-- <td>{{ emp.payload.val().Gender }}</td> -->
+            <td>{{ emp.EmpID }}</td>
+            <td><a routerLink="/employees/{{emp.key}}" data-dismiss="modal">{{ emp.FullName }}</a></td>
+            <td>{{ emp.Email }}</td>
+            <td>{{ emp.DesignationValue }}</td>
+            <!-- <td>{{ emp.Gender }}</td> -->
             <td>
               <a routerLink="/add-employee/{{emp.key}}" data-dismiss="modal">Edit</a>
             </td>

@@ -32,21 +32,21 @@
       </thead>
       <tbody>
         <tr *ngFor="let employee of employees | async">
-          <td>{{ employee.payload.val().EmpID }}</td>
-          <td><a routerLink="/employees/{{employee.key}}">{{ employee.payload.val().FullName }}</a></td>
-          <td>{{ employee.payload.val().Email }}</td>
-          <td>{{employee.payload.val().DesignationValue}}</td>
-          <!-- <td>{{employee.payload.val().Gender}}</td> -->
-          <td><a routerLink="/employees/{{employee.payload.val().LineManagerID}}">{{employee.payload.val().LineManagerValue}}</a></td>
+          <td>{{ employee.EmpID }}</td>
+          <td><a routerLink="/employees/{{employee.key}}">{{ employee.FullName }}</a></td>
+          <td>{{ employee.Email }}</td>
+          <td>{{employee.DesignationValue}}</td>
+          <!-- <td>{{employee.Gender}}</td> -->
+          <td><a routerLink="/employees/{{employee.LineManagerID}}">{{employee.LineManagerValue}}</a></td>
           <td>
             <a routerLink="/add-employee/{{employee.key}}">Edit</a>
           </td>
           <td>
-            <a href="javascript:void(0)" (click)="RemoveEmployee(employee.key, employee.payload.val().LineManagerID || '0')">Delete</a>
+            <a href="javascript:void(0)" (click)="RemoveEmployee(employee.key, employee.LineManagerID || '0')">Delete</a>
           </td>
           <td> 
-            <a href="javascript:void(0)" (click)="MarkUnmarkLM(employee.key, employee.payload.val().IsLineManager)">
-              {{employee.payload.val().IsLineManager ? 'Remove as LM' : 'Mark as LM'}}
+            <a href="javascript:void(0)" (click)="MarkUnmarkLM(employee.key, employee.IsLineManager)">
+              {{employee.IsLineManager ? 'Remove as LM' : 'Mark as LM'}}
             </a>
           </td>
         </tr>

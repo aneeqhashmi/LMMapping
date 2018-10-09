@@ -76,7 +76,7 @@ export class AddEmployeeComponent implements OnInit {
 
   onEmpIDChange(val){
     val = val.trim();
-    //console.log(val);
+    console.log(val);
     if(val.length > 0){
       this.db.database.ref('employees').orderByChild('EmpID').equalTo(val)
       .once('value').then((snapshot) => {

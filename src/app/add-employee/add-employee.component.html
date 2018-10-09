@@ -11,7 +11,7 @@
               <label *ngIf="empIdExists" class="error">Employee ID already exists.</label>
               <input type="text" class="form-control" placeholder="Enter Employee ID" 
                 id="empId" required [(ngModel)]="empIdValue" name="empId"
-                (input)="onEmpIDChange($event.target.value)">
+                (focusout)="onEmpIDChange($event.target.value)">
             </td>
           </tr>
           <tr>

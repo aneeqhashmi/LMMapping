@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, NavigationEnd } from "@angular/router";
 import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable } from 'rxjs';
+import { map, take, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-employee-details',
@@ -23,17 +24,27 @@ export class EmployeeDetailsComponent {
     });
   }
 
+  SortByName(x,y) {
+    return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
+  }
+
   loadData(){
     if(this.emp$ != '0'){
       this.db.database.ref('employees').child(this.emp$).once('value').then((snapshot)=>{
         this.employee= snapshot.val();
         if(this.employee.IsLineManager)
-          this.managees = this.db.list('employees', ref => ref.orderByChild('LineManagerID').equalTo(this.emp$)).snapshotChanges();
+          this.managees = this.db.list('employees', ref => ref.orderByChild('LineManagerID').equalTo(this.emp$))
+            .snapshotChanges().pipe(map(changes =>
+              changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+            ));
         else
           this.managees = null;
           
         if(this.employee.IsManagingDirector)
-         this.managers = this.db.list('employees', ref => ref.orderByChild('ManagingDirectorID').equalTo(this.emp$)).snapshotChanges();
+         this.managers = this.db.list('employees', ref => ref.orderByChild('ManagingDirectorID').equalTo(this.emp$))
+          .snapshotChanges().pipe(map(changes =>
+            changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+          ));
          else
           this.managers = null
       });

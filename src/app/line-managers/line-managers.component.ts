@@ -43,7 +43,9 @@ export class LineManagersComponent implements OnInit {
 
   ngOnInit() { 
     this.managers = this.db.list('employees', 
-      ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges();
+      ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges().pipe(map(changes =>
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+      ));
     this.managersActualList = this.managers;
 
     /*this.managers.pipe(map(changes =>
@@ -59,7 +61,11 @@ export class LineManagersComponent implements OnInit {
     //     managees: this.getManagees(c.key).forEach(r=>{console.log(r);})
     //   }))
     // ));
-    //this.managers.subscribe(ref=>{console.log(ref[0].payload.val())});
+    //this.managers.subscribe(ref=>{console.log(ref)});
+  }
+
+  SortByName(x,y) {
+    return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
   }
 
   FilterList(val){
@@ -68,7 +74,7 @@ export class LineManagersComponent implements OnInit {
 
     if(val!= ''){
       this.managers = this.managers.pipe(map(employees => 
-        employees.filter(emp => emp.payload.val().FullName.toLowerCase().includes(val))
+        employees.filter(emp => emp.FullName.toLowerCase().includes(val))
       ));
       //this.employees.subscribe(ref=>{console.log(ref)})
     }
@@ -109,6 +115,9 @@ export class LineManagersComponent implements OnInit {
   }
 
   GetManagees(id){
-    this.managees = this.db.list('employees', i => i.orderByChild('LineManagerID').equalTo(id)).snapshotChanges();
+    this.managees = this.db.list('employees', i => i.orderByChild('LineManagerID').equalTo(id))
+      .snapshotChanges().pipe(map(changes =>
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+      ));
   }
 }
