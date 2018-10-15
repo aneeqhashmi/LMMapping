@@ -43,6 +43,7 @@ export class AddEmployeeComponent implements OnInit {
   }
   
   ngOnInit() {
+   
     if(this.emp$ != '0'){
       this.Title = 'Edit employee';
       this.emp = this.db.object('employees/' + this.emp$).valueChanges();
@@ -112,10 +113,14 @@ export class AddEmployeeComponent implements OnInit {
       var isLMAssignedValue = (this.LMKey != "0" && this.LMKey != undefined);
       var isMDAssignedValue = (this.MDKey != "0");
 
+      var today = new Date();
+      var todayWT = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
       if(this.emp$ == '0'){
         this.emp$ = this.db.list('/employees').push({ EmpID: this.empIdValue, FullName: this.fnameValue,
           Email: this.emailValue, DesignationKey: this.designationKey, DesignationValue: this.designationValue, /*Gender: this.genderValue,*/
           IsLineManager: this.isLMValue, IsLineManagerAssigned: isLMAssignedValue, 
+          AddedOn: today.getTime(), AddedOnWT: todayWT.getTime(),
           IsManagingDirector: this.isMDValue, IsManagingDirectorAssigned: isMDAssignedValue }).key;
           
         this.Message = "Record saved successfully.";
@@ -123,7 +128,8 @@ export class AddEmployeeComponent implements OnInit {
       else{
         this.db.database.ref('/employees/' + this.emp$).update({ EmpID: this.empIdValue, FullName: this.fnameValue,
           Email: this.emailValue, DesignationKey: this.designationKey, DesignationValue: this.designationValue, /*Gender: this.genderValue,*/
-          IsLineManager: this.isLMValue, IsLineManagerAssigned: isLMAssignedValue,
+          IsLineManager: this.isLMValue, IsLineManagerAssigned: isLMAssignedValue, 
+          UpdatedOn: today.getTime(), UpdatedOnWT: todayWT.getTime(),
           IsManagingDirector: this.isMDValue, IsManagingDirectorAssigned: isMDAssignedValue });
         
         this.Message = "Record updated successfully.";

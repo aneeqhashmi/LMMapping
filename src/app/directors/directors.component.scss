@@ -5,3 +5,11 @@ th{
 a, td{
     font-size: 12px;
 }
+
+.activated {
+    background-color: #00a8ff !important;
+}
+
+.activated td{
+    font-weight: bold;
+}

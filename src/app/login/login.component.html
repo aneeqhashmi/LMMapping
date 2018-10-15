@@ -1,0 +1,28 @@
+ 
+<div class="col-md-4"></div>
+<div class="col-sm-12 col-md-4">
+  <div>
+    <div class="form-group">
+      <label for="email">Email</label> 
+      <input type="email" class="form-control" id="email" name="email" required
+        [(ngModel)]="email">
+    </div>
+  
+    <div class="form-group">
+      <label for="password">Password</label> <input type="password"
+        class="form-control" id="password" name="password" required
+        [(ngModel)]="password">
+    </div>
+    
+    <p *ngIf="errorMessage.length > 0" class="text-danger large-font">
+      {{errorMessage}}
+    </p>
+
+    <div class="pull-right">
+      <button type="submit" class="btn btn-success" (click)="onLogin()">Login</button>
+      <button type="submit" class="btn btn-primary margin-left" (click)="onSignUp()">Register</button>
+    </div>
+    
+  </div>
+</div>
+<div class="col-md-4"></div>

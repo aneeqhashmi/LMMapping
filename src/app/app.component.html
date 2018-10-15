@@ -3,32 +3,28 @@
     <app-sidebar></app-sidebar>
   
     <div id="content">
+      <div class="container-fluid">
+        <div>
+          <h2>Unassigned Employees ({{ empCount }}):
+              <i style="vertical-align: bottom;" (click)="flag=!flag"
+                class="fa fa-plus pull-right pointer nodisplay" [class.nodisplay]="flag"></i>
+              <i style="vertical-align: bottom;"  (click)="flag=!flag"
+                class="fa fa-minus pull-right pointer" [class.nodisplay]="!flag"></i>
+          </h2>
+        </div>
+        <div class="row container-fluid" [class.nodisplay]="!flag">
+          <div class="vR" *ngFor="let employee of employees | async"
+            mwlDraggable dropData="{{employee | json}}" dragActiveClass="drag-active">
+            <span class="vN" data-hovercard-id="employee.key">
+              <div class="vT">{{employee.FullName}} - {{employee.DesignationValue}}</div>
+            </span>
+          </div>
+        </div>
+        <hr>
+      </div>
+      <div class="container-fluid nodisplay">
+        <a id="logout" href="javascript:void(0)" (click)="onLogOut()">Log out</a>
+      </div>
       <router-outlet></router-outlet>
     </div>
   </div>
-
-<!-- <div class="container-fluid">
-    <div style="color: blue;">
-      <h1>{{title}}</h1>
-      <h3>{{description}}</h3>
-    </div>
-   
-    <div style="width: 300px;">
-      <form (ngSubmit)="onSubmit()">
-        <div class="form-group">
-          <label for="item">Item</label> 
-          <input type="text" class="form-control" placeholder="Enter content..." id="item"
-            required [(ngModel)]="itemValue" name="item">
-        </div>
-   
-        <div class="btn-group">
-          <button type="submit" class="btn btn-success">Submit</button>
-        </div>
-      </form>
-    </div>
-   
-    <h2>Content from Firebase</h2>
-    <div class="col-md-3">
-      <pre *ngFor="let item of items | async">{{item.content}}</.pre>
-    </div>
-  </div> -->

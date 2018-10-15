@@ -20,6 +20,12 @@
         </a>
     </li>
     <li>
+        <a routerLink="recent-employees" align="center" [class.activated]="currentUrl == '/recent-employees'">
+          <i class="fa fa-history icon-font-24"></i>
+          <label>Recently Added</label>
+        </a>
+    </li>
+    <li>
         <a routerLink="designations" align="center" [class.activated]="currentUrl == '/designations'">
           <i class="fa fa-id-badge icon-font-24"></i>
           <label>Designations</label>

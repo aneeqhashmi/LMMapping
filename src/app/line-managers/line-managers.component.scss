@@ -5,3 +5,29 @@ th{
 a, td{
     font-size: 12px;
 }
+
+.activated {
+    background-color: #73c4ef !important;
+}
+
+.activated td{
+    font-weight: bold;
+}
+
+[mwlDroppable] {
+    z-index: 1;
+    position: relative;
+  }
+  
+  [mwlDroppable] {
+    justify-content: center;
+  }
+  
+  .drop-over-active {
+    border: dashed 1px black;
+    background-color: #50b750 !important;
+  }
+  
+  .drag-active {
+    z-index: 3;
+  }

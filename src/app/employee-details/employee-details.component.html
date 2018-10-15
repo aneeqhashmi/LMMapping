@@ -10,6 +10,7 @@
         <th>Designation</th>
         <th>Line Manager</th>
         <th>Director</th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -20,6 +21,7 @@
         <td>{{ employee.DesignationValue }}</td>
         <td><a routerLink="/employees/{{employee.LineManagerID}}">{{employee.LineManagerValue}}</a></td>
         <td><a routerLink="/employees/{{employee.ManagingDirectorID}}">{{employee.ManagingDirectorValue}}</a></td>
+        <td><a routerLink="/add-employee/{{employee.key}}">Edit</a></td>
     </tr>
     </tbody>
 </table>
@@ -38,6 +40,7 @@
         <th>Full name</th>
         <th>Email</th>
         <th>Designation</th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -46,6 +49,9 @@
             <td><a routerLink="/employees/{{manager.key}}">{{ manager.FullName }}</a></td>
             <td>{{ manager.Email }}</td>
             <td>{{ manager.DesignationValue }}</td>
+            <td>
+                <a href="javascript:void(0)" (click)="RemoveManager(manager.key)">Remove</a>
+            </td>
         </tr>
     </tbody>
 </table>
@@ -65,6 +71,7 @@
                 <th>Full name</th>
                 <th>Email</th>
                 <th>Designation</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -73,6 +80,9 @@
                 <td><a routerLink="/employees/{{emp.key}}">{{ emp.FullName }}</a></td>
                 <td>{{ emp.Email }}</td>
                 <td>{{ emp.DesignationValue }}</td>
+                <td>
+                    <a href="javascript:void(0)" (click)="RemoveManagee(emp.key)">Remove</a>
+                </td>
             </tr>
         </tbody>
     </table>

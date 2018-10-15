@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 import { Observable } from 'rxjs';
-import { map, take, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { trigger,style,transition,animate,keyframes,query,stagger } from '@angular/animations';
 
 @Component({
@@ -34,19 +34,25 @@ import { trigger,style,transition,animate,keyframes,query,stagger } from '@angul
   ]
 })
 export class LineManagersComponent implements OnInit {
-
+  
   managers: Observable<any[]>;
-  managees: Observable<any[]>;
+  designations: Observable<any[]>;
+  manageesList: {} = {};
+  manageesCount: {} = {};
+  lmCount:number = 0;
   managersActualList: Observable<any[]>;
+  sortByProperty:string = 'FullName';
+  filterByText:string = '';
+  designationKey: string = '0';
 
   constructor(public db: AngularFireDatabase) { }
 
   ngOnInit() { 
-    this.managers = this.db.list('employees', 
-      ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges().pipe(map(changes =>
-        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
-      ));
+    this.loadData();
     this.managersActualList = this.managers;
+    this.designations = this.db.list('designations').snapshotChanges().pipe(map(changes =>{
+      return changes.map(c => ({ key: c.payload.key, value: c.payload.val() })).sort(this.SortByProperty('value'))
+    }));
 
     /*this.managers.pipe(map(changes =>
       changes.map(c => ({ key: c.payload.key, ...c.payload.val() }))
@@ -64,19 +70,102 @@ export class LineManagersComponent implements OnInit {
     //this.managers.subscribe(ref=>{console.log(ref)});
   }
 
-  SortByName(x,y) {
-    return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
+  loadData(){
+    var temp = this.db.list('employees', 
+    ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges().pipe(map(changes =>{
+      //console.log('fetching')
+      if(this.lmCount == 0 || this.lmCount < changes.length)
+        this.lmCount = changes.length;
+      return changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty(this.sortByProperty))
+    }));
+
+    this.managers = temp.pipe(map(employees => {
+      employees.forEach(item=>{
+        //console.log('in promise of for each of managers.')
+        
+        var prom = new Promise((resolve, reject) => {
+          this.db.list('/employees', ref => ref.orderByChild('LineManagerID').equalTo(item.key))
+          .snapshotChanges().subscribe(sub=>{
+            var mdPromise = new Promise((resolve, reject) => {
+              var mdid = '0', mdvalue = '';
+              if(item['IsLineManagerAssigned'] && !item['IsManagingDirectorAssigned']){
+                this.db.database.ref('employees').child(item['LineManagerID']).once('value').then((lm)=>{
+                  mdid = lm.val().ManagingDirectorID;
+                  mdvalue = lm.val().ManagingDirectorValue;
+                  resolve({mdid: mdid, mdvalue:mdvalue});
+                });
+              }
+              else{
+                resolve({mdid: mdid, mdvalue:mdvalue});
+              }
+            });
+            mdPromise.then((md)=>{
+              resolve({count:sub.length, mdid: md['mdid'], mdvalue:md['mdvalue']});
+            });
+          });
+        });
+        prom.then((res)=>{
+          this.manageesCount[item.key] = res["count"];
+          if(res['mdid'] != '0'){
+            item['ManagingDirectorID'] = res['mdid'];
+            item['ManagingDirectorValue'] = res['mdvalue'];
+          }
+        });
+      });
+      return employees;
+    }));
+    //managersTemp.subscribe(ref=>{console.log(ref)});
+  }
+
+  loadLMCount(lmid){
+    this.db.list('/employees', ref => ref.orderByChild('LineManagerID').equalTo(lmid))
+          .snapshotChanges().subscribe(sub=>{
+          this.manageesCount[lmid] = sub.length;
+      });
+  }
+
+  SortData(val) {
+    this.sortByProperty = val;
+    //console.log('sorting...')
+    this.managers = this.managers.pipe(map(employees => 
+      employees.sort(this.SortByProperty(val))
+    ));
+  }
+
+  SortByProperty(prop){
+    return function (x, y) {
+      return ((x[prop] == y[prop]) ? 0 : ((x[prop] > y[prop]) ? 1 : -1));
+    };
   }
 
   FilterList(val){
     this.managers= this.managersActualList;
     val = val.trim().toLowerCase();
+    this.filterByText = val;
 
-    if(val!= ''){
-      this.managers = this.managers.pipe(map(employees => 
-        employees.filter(emp => emp.FullName.toLowerCase().includes(val))
-      ));
+    if(val != '' || this.designationKey != '0'){
+      this.managers = this.managers.pipe(map(employees => {
+        var fil = employees;
+        if(val != '')
+          fil = fil.filter(emp => emp.FullName.toLowerCase().includes(val));
+        if(this.designationKey != '0'){
+          fil = fil.filter(emp => emp.DesignationKey == this.designationKey);
+        }
+        this.lmCount = fil.length;
+        return fil;
+      }));
       //this.employees.subscribe(ref=>{console.log(ref)})
+    }
+  }
+
+  FilterByDesig(desigKey){
+    this.managers= this.managersActualList;
+    if(desigKey != '0'){
+      this.managers = this.managers.pipe(map(employees => {
+        var fil = employees.filter(emp => emp.DesignationKey == desigKey);
+        this.lmCount = fil.length;
+        return fil;
+      }));
     }
   }
 
@@ -103,21 +192,41 @@ export class LineManagersComponent implements OnInit {
     if(confirm("Are you sure you want to remove this managee?")){
       var ref = this.db.database.ref('/employees');
 
-      var lmid = '';
       this.db.object('/employees/' + id + '/LineManagerID').valueChanges().subscribe(obj =>{
-        lmid = obj as string;
+        var lmid = obj as string;
         ref.child(id).child('IsLineManagerAssigned').set(false);
         ref.child(id).child('LineManagerID').remove();
         ref.child(id).child('LineManagerValue').remove();
         this.db.database.ref('/line-managers').child(lmid).child(id).remove();
+        this.loadLMCount(lmid);
       });
     }
   }
 
   GetManagees(id){
-    this.managees = this.db.list('employees', i => i.orderByChild('LineManagerID').equalTo(id))
+    if(this.manageesList[id] == undefined){
+      this.db.list('employees', i => i.orderByChild('LineManagerID').equalTo(id))
       .snapshotChanges().pipe(map(changes =>
-        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
-      ));
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty(this.sortByProperty))
+      )).subscribe(s=>{
+        this.manageesList[id] = s;
+      });
+    }
+    else{
+      this.manageesList[id] = undefined;
+    }
+  }
+
+  onDrop(dropData, lmid, lmValue) {
+    dropData = JSON.parse(dropData.dropData);
+    if(confirm('Are you sure you want to assign ' + lmValue 
+      + ' as the Line Manager of ' + dropData.FullName + '?')){
+      this.db.database.ref('/line-managers').child(lmid).child(dropData.key).set(true);
+      this.db.database.ref('/employees').child(dropData.key).update({
+        'IsLineManagerAssigned': true, 'LineManagerID' : lmid, 'LineManagerValue': lmValue
+      });
+      alert('Line Manager assigned.');
+      this.loadLMCount(lmid);
+    }
   }
 }

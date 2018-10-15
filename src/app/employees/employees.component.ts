@@ -3,9 +3,12 @@ import { AngularFireDatabase } from 'angularfire2/database';
 import { Observable } from 'rxjs';
 import { trigger,style,transition,animate,keyframes,query,stagger } from '@angular/animations';
 import { filter, map } from 'rxjs/operators';
+import { AngularFireAuth  } from 'angularfire2/auth';
+import { Router } from '@angular/router';
 
 //import { XLSX$Utils } from 'xlsx';
 import * as XLSX from 'xlsx';
+import { FirebaseAuthService } from '../firebase-auth.service';
 
 @Component({
   selector: 'app-employees',
@@ -41,28 +44,46 @@ export class EmployeesComponent implements OnInit {
 
   employees: Observable<any[]>;
   employeesActualList: Observable<any[]>;
+  empCount: number = 0;
   designations: {}[];
   data: {}[];
   range: XLSX.Range;
 
-  constructor(public db: AngularFireDatabase) {
+  constructor(public db: AngularFireDatabase,private afa: AngularFireAuth, private router: Router,
+    private auth:FirebaseAuthService) {
+      // if(this.auth.checkUser()){
+      //   this.router.navigate(['/login']);
+      // }
   }
 
   ngOnInit(){
     this.employees = this.db.list('employees').snapshotChanges().pipe(map(changes =>
-        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty('FullName'))
       ));
     this.employeesActualList = this.employees;
+    this.getCount();
 
     this.db.list('designations').snapshotChanges().pipe(map(changes =>
       changes.map(c => ({ key: c.payload.key, value: c.payload.val() }))
     )).subscribe((designations) => {
-      this.designations = designations;
+      this.designations = designations.sort(this.SortByProperty('value'));
+    });
+  }
+
+  getCount(){
+    this.employees.subscribe(s=>{
+      this.empCount = s.length;
     });
   }
 
   SortByName(x,y) {
     return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
+  }
+
+  SortByProperty(prop){
+    return function (x, y) {
+      return ((x[prop] == y[prop]) ? 0 : ((x[prop] > y[prop]) ? 1 : -1));
+    };
   }
 
   FilterList(val){
@@ -75,6 +96,17 @@ export class EmployeesComponent implements OnInit {
       ));
       //this.employees.subscribe(ref=>{console.log(ref)})
     }
+    this.getCount();
+  }
+
+  FilterByDesig(desigKey){
+    this.employees= this.employeesActualList;
+    if(desigKey != '0'){
+      this.employees = this.employees.pipe(map(employees => 
+        employees.filter(emp => emp.DesignationKey == desigKey)
+      ));
+    }
+    this.getCount();
   }
 
   GetUnAssignedList(flag){
@@ -84,6 +116,7 @@ export class EmployeesComponent implements OnInit {
         employees.filter(emp => !emp.IsLineManagerAssigned)
       ));
     }
+    this.getCount();
   }
 
   RemoveEmployee(id, lmid){
@@ -258,6 +291,9 @@ export class EmployeesComponent implements OnInit {
 
                         this.db.object('employees/' + lmID)
                           .update({ 'IsManagingDirectorAssigned': true, 'ManagingDirectorID':directorID, 'ManagingDirectorValue': directorValue });
+
+                        //this.db.object('employees/' + empid)
+                        //.update({ 'IsManagingDirectorAssigned': true, 'ManagingDirectorID':directorID, 'ManagingDirectorValue': directorValue });
                       }
 
                       if(lmID != '0'){
@@ -292,7 +328,7 @@ export class EmployeesComponent implements OnInit {
                     this.data[row][9], true, false, false, false);
                 }
 
-                lmPromise.then((lmValues )=>{
+                lmPromise.then((lmValues)=>{
                   lmID = lmValues['key'];
                   lmValue = lmValues['value'];
 
@@ -310,6 +346,9 @@ export class EmployeesComponent implements OnInit {
 
                     this.db.object('employees/' + lmID)
                       .update({ 'IsManagingDirectorAssigned': true, 'ManagingDirectorID':directorID, 'ManagingDirectorValue': directorValue });
+
+                    //this.db.object('employees/' + empid)
+                    //.update({ 'IsManagingDirectorAssigned': true, 'ManagingDirectorID':directorID, 'ManagingDirectorValue': directorValue });
                   }
 
                   if(lmID != '0'){

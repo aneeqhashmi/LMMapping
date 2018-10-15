@@ -1,0 +1,61 @@
+<div class="container-fluid">
+
+  <h1>Recently Added / Modified</h1>
+  <div class="row container-fluid">
+      
+    <div class="radio">
+      <label class="pull-left" style="font-size:20px;">
+        <input type="radio" id="added" (change)="FilterCriteriaChange('AddedOnWT')" name="optFilter" checked="checked" />
+        Filter on recently added
+      </label>
+    </div>
+    <div class="radio" style="margin-top: 10px; margin-left:5px;">
+      <label class="pull-left" style="font-size:20px;">
+        <input type="radio" id="modified" (change)="FilterCriteriaChange('UpdatedOnWT')" name="optFilter" />
+        Filter on recently modified
+      </label>
+    </div>
+  </div>
+  <div class="row container-fluid">
+    <select id="added" style="width: 25%; margin-right: 10px;" 
+      [(ngModel)]="filterBy" class="form-control pull-left" name="filterBy">
+      <option value="today" ng-selected="selected">Today</option>
+      <option value="yesterday" ng-selected="selected">Yesterday</option>
+      <option value="week" ng-selected="selected">Since last week</option>
+      <option value="month" ng-selected="selected">Since last month</option>
+      <!-- <option value="year" ng-selected="selected">an year ago</option> -->
+    </select>
+    <button type="submit" class="btn btn-success" (click)="getEmployees()">Search</button>
+  </div>
+  
+  <br>
+
+  <label class="fs-16">Total: <span>{{empCount}}</span></label>
+  
+  <div class="container" style="padding-top:20px;">    
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th style="width:7%">Emp ID</th>
+          <th>Full name</th>
+          <th>Email</th>
+          <th>Designation</th>
+          <th>Line Manager</th>
+          <th style="width: 10%">Added On</th>
+          <th style="width: 10%">Updated On</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let employee of employees | async">
+          <td>{{ employee.EmpID }}</td>
+          <td><a target="_blank" routerLink="/employees/{{employee.key}}">{{ employee.FullName }}</a></td>
+          <td>{{ employee.Email }}</td>
+          <td>{{employee.DesignationValue}}</td>
+          <td><a target="_blank" routerLink="/employees/{{employee.LineManagerID}}">{{employee.LineManagerValue}}</a></td>
+          <td>{{ employee.AddedOn | date }}</td>
+          <td>{{ employee.UpdatedOn | date }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

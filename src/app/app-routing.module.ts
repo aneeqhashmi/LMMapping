@@ -6,7 +6,8 @@ import { EmployeeDetailsComponent } from './employee-details/employee-details.co
 import { LineManagersComponent } from './line-managers/line-managers.component';
 import { AddEmployeeComponent } from './add-employee/add-employee.component';
 import { DirectorsComponent } from './directors/directors.component';
-
+import { LoginComponent } from './login/login.component';
+import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 
 const routes: Routes = [
   {
@@ -41,6 +42,14 @@ const routes: Routes = [
     path: 'directors',
     component: DirectorsComponent
   },
+  {
+    path: 'login',
+    component: LoginComponent
+  },
+  {
+    path: 'recent-employees',
+    component: RecentlyAddedComponent
+  }
 ];
 
 @NgModule({

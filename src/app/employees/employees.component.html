@@ -2,21 +2,39 @@
 
   <h1>Employees</h1>
 
-  <div class="container-fluid">
-    <a routerLink="/add-employee">Add new employee</a>
-    <div style="float:right">
-      <input type="text" placeholder="Search" class="form-control" 
+  <div class="row">
+    <div class="col-md-6">
+        <label class="pull-left" style="font-size:20px; margin-right: 10px;">Designation:</label>
+        <select id="designation" style="width: 50%; margin-right: 10px;" [(ngModel)]="designationKey"
+         class="form-control pull-left" name="designation">
+            <option value="0" ng-selected="selected">All</option>
+            <option *ngFor="let designation of designations" value={{designation.key}}>
+                {{designation.value }}
+            </option>
+        </select>
+        <button type="submit" class="btn btn-success" (click)="FilterByDesig(designationKey || '0')">Search</button>
+    </div>
+    <div class="col-md-3"></div>
+    <div class="col-md-3">
+      <input type="text" placeholder="Search" class="form-control pull-right" 
         (input)="FilterList($event.target.value)">
       <input id="chkUnassigned" type="checkbox" [(ngModel)]="LM_flag" (change)="GetUnAssignedList(LM_flag)" />
       <label for="chkUnassigned" style="padding-left:5px;">View unassigned only</label>
     </div>
   </div>
+  
   <div class="container-fluid nodisplay">
     <input type="file" style="width:25%;" class="pull-left" (change)="onFileChange($event)" 
       multiple="false" accept=".xlsx" />
     <button type="submit" class="btn btn-success" *ngIf="data != null" (click)="ImportData()">Import</button>
   </div>
-<br>
+
+  <div class="row" style="padding-left: 15px;padding-right: 15px;">
+      <label class="fs-16">Total: <span>{{empCount}}</span></label>
+      <label style="padding-left:10px; padding-right:10px;" class="fs-16">|</label>
+      <a style="font-size:16px;" routerLink="/add-employee">Add new employee</a>
+    </div>
+
   <div class="container" style="padding-top:20px;">   
     <table class="table table-striped table-hover">
       <thead>
@@ -25,7 +43,6 @@
           <th>Full name</th>
           <th>Email</th>
           <th>Designation</th>
-          <!-- <th>Gender</th> -->
           <th>Line Manager</th>
           <th colspan="3"></th>
         </tr>
@@ -33,18 +50,17 @@
       <tbody>
         <tr *ngFor="let employee of employees | async">
           <td>{{ employee.EmpID }}</td>
-          <td><a routerLink="/employees/{{employee.key}}">{{ employee.FullName }}</a></td>
+          <td><a target="_blank" routerLink="/employees/{{employee.key}}">{{ employee.FullName }}</a></td>
           <td>{{ employee.Email }}</td>
           <td>{{employee.DesignationValue}}</td>
-          <!-- <td>{{employee.Gender}}</td> -->
-          <td><a routerLink="/employees/{{employee.LineManagerID}}">{{employee.LineManagerValue}}</a></td>
+          <td><a target="_blank" routerLink="/employees/{{employee.LineManagerID}}">{{employee.LineManagerValue}}</a></td>
           <td>
-            <a routerLink="/add-employee/{{employee.key}}">Edit</a>
+            <a target="_blank" routerLink="/add-employee/{{employee.key}}">Edit</a>
           </td>
           <td>
             <a href="javascript:void(0)" (click)="RemoveEmployee(employee.key, employee.LineManagerID || '0')">Delete</a>
           </td>
-          <td> 
+          <td style="width: 10%"> 
             <a href="javascript:void(0)" (click)="MarkUnmarkLM(employee.key, employee.IsLineManager)">
               {{employee.IsLineManager ? 'Remove as LM' : 'Mark as LM'}}
             </a>

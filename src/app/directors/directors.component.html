@@ -1,102 +1,90 @@
 <div class="container-fluid">
 
-<h1>Directors</h1>
-
-<div class="container-fluid">
-    
-    <input type="text" placeholder="Search" class="form-control" style="width:20%;float: right;" 
-    (input)="FilterList($event.target.value)">
+  <h1>Directors</h1>
+  <div class="row">
+    <div class="col-md-6">
+        <label class="pull-left" style="font-size:20px; margin-right: 10px;">Designation:</label>
+        <select id="designation" style="width: 50%; margin-right: 10px;" [(ngModel)]="designationKey"
+          class="form-control pull-left" name="designation">
+            <option value="0" ng-selected="selected">All</option>
+            <option *ngFor="let designation of designations | async" value={{designation.key}}>
+                {{designation.value}}
+            </option>
+        </select>
+        <button type="submit" class="btn btn-success" (click)="FilterByDesig(designationKey || '0')">Search</button>
+    </div>
+    <div class="col-md-6">
+      <input type="text" placeholder="Search" class="form-control" style="width:40%;float: right;" 
+      (input)="FilterList($event.target.value)">
+    </div>
   </div>
-  <br>
+  
+  <label class="fs-16">Total: <span>{{dirCount}}</span></label>
+
   <div class="container" style="padding-top:20px;">    
-<table class="table table-striped table-hover">
-<thead>
-  <tr>
-    <th>Emp ID</th>
-    <th>Full name</th>
-    <th>Email</th>
-    <th>Designation</th>
-    <!-- <th>Gender</th> -->
-    <th>View LMs</th>
-    <th colspan="3"></th>
-  </tr>
-</thead>
-<tbody>
-  <tr *ngFor="let dir of directors | async">
-    <td>{{ dir.EmpID }}</td>
-    <td><a routerLink="/employees/{{dir.key}}">{{ dir.FullName }}</a></td>
-    <td>{{ dir.Email }}</td>
-    <td>{{ dir.DesignationValue }}</td>
-    <!-- <td>{{ dir.Gender }}</td> -->
-    <td>
-      <input type="image" class="show" (click)="GetManagers(dir.key);" 
-      src="https://mbtskoudsalg.com/images/vision-icon-png-5.png" style="width:20px;"
-      data-toggle="modal" data-target="#LMsModal" />
-    </td>
-    <td>
-      <a routerLink="/add-employee/{{dir.key}}">Edit</a>
-    </td>
-    <td>
-      <a href="javascript:void(0)" class="padding-left" (click)="MarkUnmarkED(dir.key, dir.IsManagingDirector)">
-        {{dir.IsManagingDirector ? 'Remove as ED' : 'Mark as ED'}}
-      </a>
-    </td>
-  </tr>
-</tbody>
-</table>
+  <table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Emp ID</th>
+      <th>Full name</th>
+      <th>Email</th>
+      <th>Designation</th>
+      <th style="text-align:center;">LMs Count</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+  <tbody>
+      <ng-container *ngFor="let dir of directors | async">
+        <tr [class.activated]="managersList[dir.key]">
+          <td>{{ dir.EmpID }}</td>
+          <td><a target="_blank" routerLink="/employees/{{dir.key}}">{{ dir.FullName }}</a></td>
+          <td>{{ dir.Email }}</td>
+          <td>{{ dir.DesignationValue }}</td>
+          <td align="center" style="cursor:pointer;" (click)="GetManagers(dir.key);">
+            <a href="javascript:void(0)">{{dir.LineManageesCount}}</a>
+          </td>
+          <td>
+            <a target="_blank" routerLink="/add-employee/{{dir.key}}">Edit</a>
+          </td>
+          <td>
+            <a href="javascript:void(0)" class="padding-left" (click)="MarkUnmarkED(dir.key, dir.IsManagingDirector)">
+              {{dir.IsManagingDirector ? 'Remove as ED' : 'Mark as ED'}}
+            </a>
+          </td>
+        </tr>
+        <tr class="expand-child" *ngIf="managersList[dir.key]">
+            <td colspan="12">
+            <table class="table table-condensed table-bordered" width="100%">
+            <thead>
+              <tr>
+                <th>Emp ID</th>
+                <th>Full name</th>
+                <th>Email</th>
+                <th>Designation</th>
+                <th colspan="2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let emp of managersList[dir.key]">
+                <td>{{ emp.EmpID }}</td>
+                <td><a target="_blank" routerLink="/employees/{{emp.key}}">{{ emp.FullName }}</a></td>
+                <td>{{ emp.Email }}</td>
+                <td>{{ emp.DesignationValue }}</td>
+                <td>
+                  <a target="_blank" routerLink="/add-employee/{{emp.key}}">Edit</a>
+                </td>
+                <td> 
+                  <a href="javascript:void(0)" (click)="RemoveManager(emp.key)">
+                    Remove
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      </ng-container>
+  </tbody>
+  </table>
 </div>
-
-<!-- The Modal -->
-<div class="modal" id="LMsModal">
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
-
-<!-- Modal Header -->
-<div class="modal-header">
-  <h4 class="modal-title">Line Managees</h4>
-  <button type="button" class="close" data-dismiss="modal">&times;</button>
-</div>
-
-<!-- Modal body -->
-<div class="modal-body">
-    <table class="table table-striped table-hover">
-        <thead>
-          <tr>
-            <th>Emp ID</th>
-            <th>Full name</th>
-            <th>Email</th>
-            <th>Designation</th>
-            <!-- <th>Gender</th> -->
-            <th colspan="2"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let emp of managers | async">
-            <td>{{ emp.EmpID }}</td>
-            <td><a routerLink="/employees/{{emp.key}}" data-dismiss="modal">{{ emp.FullName }}</a></td>
-            <td>{{ emp.Email }}</td>
-            <td>{{ emp.DesignationValue }}</td>
-            <!-- <td>{{ emp.Gender }}</td> -->
-            <td>
-              <a routerLink="/add-employee/{{emp.key}}" data-dismiss="modal">Edit</a>
-            </td>
-            <td> 
-              <a href="javascript:void(0)" (click)="RemoveManager(emp.key)">
-                Remove
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-</div>
-
-<!-- Modal footer -->
-<div class="modal-footer">
-  <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-</div>
-
-</div>
-</div>
-</div>
-
 </div>
