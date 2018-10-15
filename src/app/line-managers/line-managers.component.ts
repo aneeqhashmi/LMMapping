@@ -35,13 +35,10 @@ import { trigger,style,transition,animate,keyframes,query,stagger } from '@angul
 })
 export class LineManagersComponent implements OnInit {
   
-  managers: Observable<any[]>;
+  managers: any[] = [];
   designations: Observable<any[]>;
   manageesList: {} = {};
-  manageesCount: {} = {};
-  lmCount:number = 0;
-  managersActualList: Observable<any[]>;
-  sortByProperty:string = 'FullName';
+  managersActualList: any[];
   filterByText:string = '';
   designationKey: string = '0';
 
@@ -49,7 +46,6 @@ export class LineManagersComponent implements OnInit {
 
   ngOnInit() { 
     this.loadData();
-    this.managersActualList = this.managers;
     this.designations = this.db.list('designations').snapshotChanges().pipe(map(changes =>{
       return changes.map(c => ({ key: c.payload.key, value: c.payload.val() })).sort(this.SortByProperty('value'))
     }));
@@ -72,15 +68,15 @@ export class LineManagersComponent implements OnInit {
 
   loadData(){
     var temp = this.db.list('employees', 
-    ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges().pipe(map(changes =>{
+    ref => ref.orderByChild('IsLineManager').equalTo(true)).snapshotChanges().pipe(map(changes =>
       //console.log('fetching')
-      if(this.lmCount == 0 || this.lmCount < changes.length)
-        this.lmCount = changes.length;
-      return changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty(this.sortByProperty))
-    }));
+      changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty('FullName'))
+    ));
 
-    this.managers = temp.pipe(map(employees => {
-      employees.forEach(item=>{
+    temp.subscribe(s=>{
+      this.managers = s as any[];
+      this.managersActualList = this.managers;
+      this.managers.map(item=>{
         //console.log('in promise of for each of managers.')
         
         var prom = new Promise((resolve, reject) => {
@@ -105,31 +101,29 @@ export class LineManagersComponent implements OnInit {
           });
         });
         prom.then((res)=>{
-          this.manageesCount[item.key] = res["count"];
+          item.manageesCount = res["count"];
           if(res['mdid'] != '0'){
             item['ManagingDirectorID'] = res['mdid'];
             item['ManagingDirectorValue'] = res['mdvalue'];
           }
         });
       });
-      return employees;
-    }));
+    });
     //managersTemp.subscribe(ref=>{console.log(ref)});
   }
 
   loadLMCount(lmid){
     this.db.list('/employees', ref => ref.orderByChild('LineManagerID').equalTo(lmid))
           .snapshotChanges().subscribe(sub=>{
-          this.manageesCount[lmid] = sub.length;
+          //this.manageesCount[lmid] = sub.length;
+          this.managers.filter(f=>f.key == lmid).map(item=>{
+            //console.log('in promise of for each of managers.')
+              this.db.list('/employees', ref => ref.orderByChild('LineManagerID').equalTo(item.key))
+              .snapshotChanges().subscribe(sub=>{
+                item.manageesCount = sub.length;
+              });
+          });
       });
-  }
-
-  SortData(val) {
-    this.sortByProperty = val;
-    //console.log('sorting...')
-    this.managers = this.managers.pipe(map(employees => 
-      employees.sort(this.SortByProperty(val))
-    ));
   }
 
   SortByProperty(prop){
@@ -143,29 +137,18 @@ export class LineManagersComponent implements OnInit {
     val = val.trim().toLowerCase();
     this.filterByText = val;
 
-    if(val != '' || this.designationKey != '0'){
-      this.managers = this.managers.pipe(map(employees => {
-        var fil = employees;
-        if(val != '')
-          fil = fil.filter(emp => emp.FullName.toLowerCase().includes(val));
-        if(this.designationKey != '0'){
-          fil = fil.filter(emp => emp.DesignationKey == this.designationKey);
-        }
-        this.lmCount = fil.length;
-        return fil;
-      }));
-      //this.employees.subscribe(ref=>{console.log(ref)})
+    if(val != ''){
+      this.managers = this.managers.filter(emp => (emp['FullName'] as string).toLowerCase().includes(val)) as any[];
+    }
+    if(this.designationKey != '0'){
+      this.managers = this.managers.filter(emp => emp['DesignationKey'] == this.designationKey) as any[];
     }
   }
 
   FilterByDesig(desigKey){
     this.managers= this.managersActualList;
     if(desigKey != '0'){
-      this.managers = this.managers.pipe(map(employees => {
-        var fil = employees.filter(emp => emp.DesignationKey == desigKey);
-        this.lmCount = fil.length;
-        return fil;
-      }));
+      this.managers = this.managers.filter(emp => emp['DesignationKey'] == this.designationKey) as any[];
     }
   }
 
@@ -207,7 +190,7 @@ export class LineManagersComponent implements OnInit {
     if(this.manageesList[id] == undefined){
       this.db.list('employees', i => i.orderByChild('LineManagerID').equalTo(id))
       .snapshotChanges().pipe(map(changes =>
-        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty(this.sortByProperty))
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty('FullName'))
       )).subscribe(s=>{
         this.manageesList[id] = s;
       });

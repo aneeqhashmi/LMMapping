@@ -11,18 +11,16 @@ import { trigger,style,transition,animate,keyframes,query,stagger } from '@angul
 })
 export class DirectorsComponent implements OnInit {
 
-  directors: Observable<any[]>;
+  directors: any[] = [];
   designations: Observable<any[]>;
   managersList: {} = {};
-  dirCount: number = 0;
-  directorsActualList: Observable<any[]>;
+  directorsActualList: any[]
   designationKey: string = '0';
 
   constructor(public db: AngularFireDatabase) { }
 
   ngOnInit() {
     this.loadData();
-    this.directorsActualList = this.directors;
     this.designations = this.db.list('designations').snapshotChanges().pipe(map(changes =>{
       return changes.map(c => ({ key: c.payload.key, value: c.payload.val() })).sort(this.SortByProperty('value'))
     }));
@@ -30,16 +28,17 @@ export class DirectorsComponent implements OnInit {
 
   loadData(){
     var temp = this.db.list('employees', ref => ref.orderByChild('IsManagingDirector').equalTo(true))
-    .snapshotChanges().pipe(map(changes => {
-      if(this.dirCount == 0 || this.dirCount < changes.length)
-      this.dirCount = changes.length;
-      return changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
-    }));
+      .snapshotChanges().pipe(map(changes => 
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty('FullName'))
+    ));
 
-    this.directors = temp.pipe(map(employees => {
-      employees.forEach(item=>{
-        console.log('in promise of for each of directors.')
-        
+    temp.subscribe(s=>{
+      this.directors = s as any[];
+      this.directorsActualList = this.directors;
+
+      this.directors.map(item=>{
+        //console.log('in promise of for each of directors.')
+          
         var prom = new Promise((resolve, reject) => {
           this.db.list('/employees', ref => ref.orderByChild('ManagingDirectorID').equalTo(item.key))
           .snapshotChanges().subscribe(sub=>{
@@ -50,13 +49,8 @@ export class DirectorsComponent implements OnInit {
           item['LineManageesCount'] = res['count'];
         });
       });
-      return employees;
-    }));
+    });
     //managersTemp.subscribe(ref=>{console.log(ref)});
-  }
-
-  SortByName(x,y) {
-    return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
   }
 
   SortByProperty(prop){
@@ -69,28 +63,18 @@ export class DirectorsComponent implements OnInit {
     this.directors= this.directorsActualList;
     val = val.trim().toLowerCase();
 
-    if(val != '' || this.designationKey != '0'){
-      this.directors = this.directors.pipe(map(employees => {
-        var fil = employees;
-        if(val != '')
-          fil = fil.filter(emp => emp.FullName.toLowerCase().includes(val))
-        if(this.designationKey != '0'){
-          fil = fil.filter(emp => emp.DesignationKey == this.designationKey);
-        }
-        this.dirCount = fil.length;
-        return fil;
-      }));
+    if(val != ''){
+      this.directors = this.directors.filter(emp => (emp['FullName'] as string).toLowerCase().includes(val)) as any[];
+    }
+    if(this.designationKey != '0'){
+      this.directors = this.directors.filter(emp => emp['DesignationKey'] == this.designationKey) as any[];
     }
   }
 
   FilterByDesig(desigKey){
     this.directors= this.directorsActualList;
     if(desigKey != '0'){
-      this.directors = this.directors.pipe(map(employees => {
-        var fil = employees.filter(emp => emp.DesignationKey == desigKey);
-        this.dirCount = fil.length;
-        return fil;
-      }));
+      this.directors = this.directors.filter(emp => emp['DesignationKey'] == this.designationKey) as any[];
     }
   }
 
@@ -132,7 +116,7 @@ export class DirectorsComponent implements OnInit {
     if(this.managersList[id] == undefined){
       this.db.list('employees', i => i.orderByChild('ManagingDirectorID').equalTo(id))
       .snapshotChanges().pipe(map(changes =>
-        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByName)
+        changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty('FullName'))
       )).subscribe(s=>{
         this.managersList[id] = s;
       });

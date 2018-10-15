@@ -42,12 +42,12 @@ import { FirebaseAuthService } from '../firebase-auth.service';
 
 export class EmployeesComponent implements OnInit {
 
-  employees: Observable<any[]>;
-  employeesActualList: Observable<any[]>;
-  empCount: number = 0;
+  employees: any[] = [];
+  employeesActualList: any[];
   designations: {}[];
   data: {}[];
   range: XLSX.Range;
+  designationKey: string = '0';
 
   constructor(public db: AngularFireDatabase,private afa: AngularFireAuth, private router: Router,
     private auth:FirebaseAuthService) {
@@ -57,27 +57,20 @@ export class EmployeesComponent implements OnInit {
   }
 
   ngOnInit(){
-    this.employees = this.db.list('employees').snapshotChanges().pipe(map(changes =>
+    var temp = this.db.list('employees').snapshotChanges().pipe(map(changes =>
         changes.map(c => ({ key: c.payload.key, ...c.payload.val() })).sort(this.SortByProperty('FullName'))
       ));
-    this.employeesActualList = this.employees;
-    this.getCount();
 
+    temp.subscribe(s=>{
+      this.employees = s as any[];
+      this.employeesActualList = this.employees;
+    });
+    
     this.db.list('designations').snapshotChanges().pipe(map(changes =>
       changes.map(c => ({ key: c.payload.key, value: c.payload.val() }))
     )).subscribe((designations) => {
       this.designations = designations.sort(this.SortByProperty('value'));
     });
-  }
-
-  getCount(){
-    this.employees.subscribe(s=>{
-      this.empCount = s.length;
-    });
-  }
-
-  SortByName(x,y) {
-    return ((x.FullName == y.FullName) ? 0 : ((x.FullName > y.FullName) ? 1 : -1 ));
   }
 
   SortByProperty(prop){
@@ -91,32 +84,25 @@ export class EmployeesComponent implements OnInit {
     val = val.trim().toLowerCase();
 
     if(val!= ''){
-      this.employees = this.employees.pipe(map(employees => 
-        employees.filter(emp => emp.FullName.toLowerCase().includes(val))
-      ));
-      //this.employees.subscribe(ref=>{console.log(ref)})
+      this.employees = this.employees.filter(emp => (emp['FullName'] as string).toLowerCase().includes(val)) as any[];
     }
-    this.getCount();
+    if(this.designationKey != '0'){
+      this.employees = this.employees.filter(emp => emp['DesignationKey'] == this.designationKey) as any[];
+    }
   }
 
   FilterByDesig(desigKey){
     this.employees= this.employeesActualList;
     if(desigKey != '0'){
-      this.employees = this.employees.pipe(map(employees => 
-        employees.filter(emp => emp.DesignationKey == desigKey)
-      ));
+      this.employees = this.employees.filter(emp => emp['DesignationKey'] == this.designationKey) as any[];
     }
-    this.getCount();
   }
 
   GetUnAssignedList(flag){
     this.employees= this.employeesActualList;
     if(flag){
-      this.employees = this.employees.pipe(map(employees => 
-        employees.filter(emp => !emp.IsLineManagerAssigned)
-      ));
+      this.employees = this.employees.filter(emp => !emp.IsLineManagerAssigned) as any[];
     }
-    this.getCount();
   }
 
   RemoveEmployee(id, lmid){

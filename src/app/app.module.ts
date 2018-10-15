@@ -23,6 +23,7 @@ import { LoginComponent } from './login/login.component';
 
 import { DragAndDropModule } from 'angular-draggable-droppable';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
+import {DataTableModule} from "angular-6-datatable";
 
 @NgModule({
   declarations: [
@@ -45,7 +46,8 @@ import { RecentlyAddedComponent } from './recently-added/recently-added.componen
     AngularFireDatabaseModule, // for database,
     AngularFireAuthModule,
     BrowserAnimationsModule,
-    DragAndDropModule
+    DragAndDropModule,
+    DataTableModule
   ],
   providers: [],
   bootstrap: [AppComponent]
